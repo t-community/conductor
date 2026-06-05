@@ -1,0 +1,47 @@
+server {
+    listen ${PORT};
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Proxy /api, /actuator, and /swagger-ui to the conductor server.
+    # WF_SERVER may be on a completely different domain from the UI.
+    # In Kubernetes, WF_SERVER can be an in-cluster Service URL
+    # (e.g. http://conductor-server.default.svc.cluster.local:8080) —
+    # kube-dns always resolves Service names so no special resolver is needed.
+    location /api {
+        proxy_pass ${WF_SERVER};
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 300s;
+    }
+
+    location /actuator {
+        proxy_pass ${WF_SERVER};
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /swagger-ui {
+        proxy_pass ${WF_SERVER};
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # React SPA — serve index.html for all non-file routes
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
