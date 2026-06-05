@@ -15,9 +15,9 @@ RUN apk update && apk add --no-cache python3 py3-pip make g++
 WORKDIR /usr/src/app
 
 COPY ./ui/package.json ./
-# Install deps; explicitly add @types/react* so TypeScript finds them at the
-# top-level node_modules (yarn 1.x doesn't always hoist them from react-scripts)
-RUN yarn install \
+# Increase network timeout to 10 min — ARM64 QEMU emulation is slow on downloads
+RUN yarn config set network-timeout 600000 -g \
+    && yarn install \
     && yarn add --dev @types/react@^18 @types/react-dom@^18 \
     && mkdir -p public && cp -r node_modules/monaco-editor public/
 

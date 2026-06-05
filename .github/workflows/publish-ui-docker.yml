@@ -42,20 +42,6 @@ jobs:
           echo "RELEASE_VERSION=$PUBLISH_VERSION" >> $GITHUB_ENV
           echo "Publishing version: $PUBLISH_VERSION"
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 'lts/*'
-
-      - name: Build UI
-        run: |
-          cd ui
-          corepack enable && corepack prepare yarn@stable --activate
-          export REACT_APP_MONACO_EDITOR_USING_CDN=false
-          export REACT_APP_ENABLE_ERRORS_INSPECTOR=true
-          yarn config set network-timeout 600000 -g
-          yarn install && cp -r node_modules/monaco-editor public/ && yarn build
-
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
